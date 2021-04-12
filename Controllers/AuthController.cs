@@ -105,6 +105,14 @@ namespace Notesier_API
            
         }
 
+        [HttpPost, Route("/api/logout")]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("token");
+
+            return NoContent();
+        }
+
         private ClaimsIdentity GetIdentity(string name, string password, out UserModel user)
         {
             user = db.Users.FirstOrDefault(user => user.Name == name);
