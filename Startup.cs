@@ -12,6 +12,7 @@ using Microsoft.OpenApi.Models;
 using Notesier_API.Models;
 using Notesier_API.Utils;
 using Notesier_API.Utils.Services;
+using Notesier_API.Utils.Services.ModelServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,6 +56,8 @@ namespace Notesier_API
 
             services.AddJWTHandler();
             services.AddModelStateSerializer();
+
+            services.AddModelServiceHandling();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -79,6 +82,27 @@ namespace Notesier_API
             {
                 endpoints.MapControllers();
             });
+        }
+    }
+
+    internal class NewClass
+    {
+        public UserModelService UserModelService { get; }
+
+        public NewClass(UserModelService userModelService)
+        {
+            UserModelService = userModelService;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is NewClass other &&
+                   EqualityComparer<UserModelService>.Default.Equals(UserModelService, other.UserModelService);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(UserModelService);
         }
     }
 }

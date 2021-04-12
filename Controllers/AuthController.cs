@@ -7,6 +7,7 @@ using Notesier_API.Utils;
 using Notesier_API.Utils.Filters;
 using Notesier_API.Utils.Responses;
 using Notesier_API.Utils.Services;
+using Notesier_API.Utils.Services.ModelServices;
 using Notesier_API.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -23,36 +24,36 @@ namespace Notesier_API
     public class AuthController : Controller
     {
 
-        private NotesierContext db;
         private JWTHandler JWTHandler;
         private ModelStateSerializer modelStateSerializer;
+        private UserModelService userModelService;
 
-        public AuthController(NotesierContext context, JWTHandler _JWTCreator, ModelStateSerializer _modelStateSerializer)
+        public AuthController(UserModelService _userModelService, JWTHandler _JWTCreator, ModelStateSerializer _modelStateSerializer)
         {
-            db = context;
             JWTHandler = _JWTCreator;
             modelStateSerializer = _modelStateSerializer;
+            userModelService = _userModelService;
         }
 
         [Auth, HttpPost, Route("/api/auth")]
-        public async Task<IActionResult> Auth()
+        public IActionResult Auth()
         {
             object token = HttpContext.Items["token"];
-            if(token != null)
+            if (token != null)
             {
                 try
                 {
                     ClaimsPrincipal claims = JWTHandler.Validate(token.ToString());
-                    UserModel user = db.Users.FirstOrDefault(user => user.Name == claims.Claims.First().Value);
+                    UserModel user = userModelService.GetUserByName(claims.Claims.First().Value);
 
                     return Json(new SuccessResponse(new { Id = user.Id, Name = user.Name }));
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     return BadRequest(new ErrorResponse("Неккоректный токен!"));
                 }
-                
-                
+
+
             }
             return BadRequest(new ErrorResponse("Токен не найден!"));
         }
@@ -60,22 +61,16 @@ namespace Notesier_API
         [HttpPost, Route("/api/register")]
         public async Task<IActionResult> Register(UserModel user)
         {
-            if (db.Users.FirstOrDefault(u => u.Name == user.Name) != null)
+            if (userModelService.GetUserByName(user.Name) != null)
             {
                 ModelState.AddModelError("name", "Пользователь с таким именем уже существует!");
             }
 
             if (ModelState.IsValid)
             {
-                
-                string password = user.Password;
-
-                user.Password = Crypto.HashPassword(password);
-                await db.Users.AddAsync(user);
-                await db.SaveChangesAsync();
-
+                await userModelService.CreateUser(user);
                
-                var identity = GetIdentity(user.Name, password, out user);
+                var identity = GetIdentity(user.Name, user.Password, out user);
 
                 AddJWT(identity.Claims);
                 return Json(new SuccessResponse(new { Id = user.Id, Name = user.Name  }));
@@ -115,7 +110,7 @@ namespace Notesier_API
 
         private ClaimsIdentity GetIdentity(string name, string password, out UserModel user)
         {
-            user = db.Users.FirstOrDefault(user => user.Name == name);
+            user = userModelService.GetUserByName(name);
             if (user != null && Crypto.VerifyHashedPassword(user.Password, password))
             {
                 var claims = new List<Claim>
