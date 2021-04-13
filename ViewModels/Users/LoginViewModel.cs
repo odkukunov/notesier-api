@@ -12,9 +12,9 @@ namespace Notesier_API.ViewModels
     public class LoginViewModel : UserBaseViewModel
     {
         [Required(ErrorMessage = "Имя - обязательно поле"), StringLength(16, MinimumLength = 3, ErrorMessage = "Длина имени должна составлять от 3 до 16 символов!")]
-        public new string Name { get; set; }
+        public override string Name { get; set; }
 
         [Column(TypeName = "varchar(200)"), Required(ErrorMessage = "Пароль - это обязательное поле!")]
-        public new string Password { get; set; }
+        public override string Password { get; set; }
     }
 }

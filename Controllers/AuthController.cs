@@ -57,12 +57,13 @@ namespace Notesier_API
 
             if (ModelState.IsValid)
             {
+                string password = user.Password;
                 await userModelService.CreateUser(user);
                
-                var identity = GetIdentity(user.Name, user.Password, out user);
+                var identity = GetIdentity(user.Name, password, out user);
 
                 AddJWT(identity.Claims);
-                return Json(new SuccessResponse(new { Id = user.Id, Name = user.Name  }));
+                return Json(new SuccessResponse(user.Only("Id", "Name")));
             }
 
             return BadRequest(new ErrorResponse(modelStateSerializer.Serialize(ModelState)));
@@ -82,7 +83,7 @@ namespace Notesier_API
                 }
 
                 AddJWT(identity.Claims);
-                return Json(new SuccessResponse(new { Id = _user.Id, Name = _user.Name }));
+                return Json(new SuccessResponse(user.Only("Id", "Name")));
             }
 
             return BadRequest(new ErrorResponse(modelStateSerializer.Serialize(ModelState)));
@@ -100,12 +101,13 @@ namespace Notesier_API
         private ClaimsIdentity GetIdentity(string name, string password, out UserModel user)
         {
             user = userModelService.GetUserByName(name);
+
             if (user != null && Crypto.VerifyHashedPassword(user.Password, password))
             {
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimsIdentity.DefaultNameClaimType, user.Name),
-                    new Claim("Password", user.Password)
+                    new Claim("Password", password)
                 };
 
                 ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme, ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);

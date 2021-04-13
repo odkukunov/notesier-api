@@ -84,25 +84,4 @@ namespace Notesier_API
             });
         }
     }
-
-    internal class NewClass
-    {
-        public UserModelService UserModelService { get; }
-
-        public NewClass(UserModelService userModelService)
-        {
-            UserModelService = userModelService;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is NewClass other &&
-                   EqualityComparer<UserModelService>.Default.Equals(UserModelService, other.UserModelService);
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(UserModelService);
-        }
-    }
 }

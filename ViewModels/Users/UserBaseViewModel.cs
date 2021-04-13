@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Notesier_API.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -7,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace Notesier_API.ViewModels.Users
 {
-    public class UserBaseViewModel
+    public class UserBaseViewModel : Model
     {
         [StringLength(16, MinimumLength = 3, ErrorMessage = "Длина имени должна составлять от 3 до 16 символов!")]
-        public string Name { get; set; }
+        public virtual string Name { get; set; }
 
         [Column(TypeName = "varchar(200)")]
-        public string Password { get; set; }
+        public virtual string Password { get; set; }
     }
 }

@@ -28,7 +28,7 @@ namespace Notesier_API.Controllers
         }
 
         [HttpPatch()]
-        public IActionResult Update(UpdateMeViewModel updateMeViewModel)
+        public async Task<IActionResult> Update(UpdateMeViewModel updateMeViewModel)
         {
             UserModel currentUser = (UserModel)HttpContext.Items["User"];
 
@@ -41,14 +41,14 @@ namespace Notesier_API.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    UserModel user = userModelService.FindAndUpdateUser(currentUser.Id, updateMeViewModel);
+                    UserModel user = await userModelService.FindAndUpdateUser(currentUser.Id, updateMeViewModel);
 
                     if (user == null)
                     {
                         return NotFound(new ErrorResponse("Пользователь не найден!"));
                     }
 
-                    return Json(new SuccessResponse(user));
+                    return Json(new SuccessResponse(user.Only("Id", "Name")));
                 }
 
                 return BadRequest(new ErrorResponse(modelStateSerializer.Serialize(ModelState)));

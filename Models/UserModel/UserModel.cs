@@ -16,5 +16,6 @@ namespace Notesier_API.Models
 
         [Required(ErrorMessage = "Почта - это обязательное поле!"), RegularExpression(@"\w+@\w+\.\w+", ErrorMessage = "Неправильный формат почты")]
         public string Email { get; set; }
+
     }
 }

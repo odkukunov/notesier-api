@@ -1,4 +1,5 @@
-﻿using Notesier_API.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using Notesier_API.Models;
 using Notesier_API.ViewModels;
 using Notesier_API.ViewModels.Users;
 using System;
@@ -23,24 +24,22 @@ namespace Notesier_API.Utils.Services.ModelServices
             return db.Users.FirstOrDefault(u => u.Name == name);
         }
 
-        public UserModel FindAndUpdateUser(int id, UpdateMeViewModel updateMeViewModel)
+        public async Task<UserModel> FindAndUpdateUser(int id, UpdateMeViewModel updateMeViewModel)
         {
             var user = db.Users.FirstOrDefault(u => u.Id == id);
 
 
             if (user != null)
             {
-                if (updateMeViewModel.Name != null)
-                {
-                    user.Name = updateMeViewModel.Name;
-                }
+                db.Entry(user).State = EntityState.Modified;
+                db.Entry(user).CurrentValues.SetValues(updateMeViewModel.ExceptNull());
 
                 if(updateMeViewModel.Password != null)
                 {
                     user.Password = Crypto.HashPassword(updateMeViewModel.Password);
                 }
 
-                db.SaveChanges();
+                await db.SaveChangesAsync();
 
                 return user;
             }
@@ -55,6 +54,8 @@ namespace Notesier_API.Utils.Services.ModelServices
             user.Password = Crypto.HashPassword(password);
             await db.Users.AddAsync(user);
             await db.SaveChangesAsync();
+
+            Console.WriteLine(228);
         }
     }
 }
