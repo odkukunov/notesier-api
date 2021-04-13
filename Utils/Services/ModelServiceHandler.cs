@@ -12,7 +12,7 @@ namespace Notesier_API.Utils.Services
     {
         public static void AddModelServiceHandling(this IServiceCollection services)
         {
-            services.AddScoped<UserModelService>();
+            services.AddSingleton<UserModelService>();
         }
     }
 }

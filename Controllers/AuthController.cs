@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Notesier_API.Models;
 using Notesier_API.Utils;
-using Notesier_API.Utils.Filters;
 using Notesier_API.Utils.Responses;
 using Notesier_API.Utils.Services;
 using Notesier_API.Utils.Services.ModelServices;
@@ -35,27 +34,17 @@ namespace Notesier_API
             userModelService = _userModelService;
         }
 
-        [Auth, HttpPost, Route("/api/auth")]
+        [HttpPost, Route("/api/auth")]
         public IActionResult Auth()
         {
-            object token = HttpContext.Items["token"];
-            if (token != null)
+            UserModel user = (UserModel)HttpContext.Items["User"];
+
+            if(user != null)
             {
-                try
-                {
-                    ClaimsPrincipal claims = JWTHandler.Validate(token.ToString());
-                    UserModel user = userModelService.GetUserByName(claims.Claims.First().Value);
-
-                    return Json(new SuccessResponse(new { Id = user.Id, Name = user.Name }));
-                }
-                catch (Exception e)
-                {
-                    return BadRequest(new ErrorResponse("Неккоректный токен!"));
-                }
-
-
+                return Json(new SuccessResponse(new { Id = user.Id, Name = user.Name}));
             }
-            return BadRequest(new ErrorResponse("Токен не найден!"));
+
+            return Unauthorized(new ErrorResponse("Вы не авторизованы!"));
         }
 
         [HttpPost, Route("/api/register")]

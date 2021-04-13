@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Notesier_API.Utils.Services.ModelServices
 {
-    public class ModelService
+    public abstract class ModelService
     {
     }
 }

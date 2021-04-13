@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Notesier_API.Middlewares;
 using Notesier_API.Models;
 using Notesier_API.Utils;
 using Notesier_API.Utils.Services;
@@ -42,7 +43,7 @@ namespace Notesier_API
             }));
 
             string connection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<NotesierContext>(options => options.UseSqlServer(connection));
+            services.AddDbContext<NotesierContext>(options => options.UseSqlServer(connection), ServiceLifetime.Singleton);
 
             services.AddControllers().ConfigureApiBehaviorOptions(options => {
                 options.SuppressModelStateInvalidFilter = true;
@@ -53,10 +54,8 @@ namespace Notesier_API
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Notesier_API", Version = "v1" });
             });
 
-
             services.AddJWTHandler();
             services.AddModelStateSerializer();
-
             services.AddModelServiceHandling();
         }
 
@@ -73,8 +72,9 @@ namespace Notesier_API
 
             app.UseCors("MyPolicy");
 
-
             app.UseHttpsRedirection();
+
+            app.UseAuthMiddleware();
 
             app.UseRouting();
 

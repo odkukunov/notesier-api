@@ -25,12 +25,9 @@ namespace Notesier_API
             }
             catch(Exception e)
             {
-                Console.WriteLine(228);
                 var logger = services.GetRequiredService<ILogger<Program>>();
                 logger.LogError(e.Message);
             }
-            
-
             host.Run();
         }
 
